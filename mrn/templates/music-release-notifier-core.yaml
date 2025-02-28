@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-deployment
+  labels:
+    app: core-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      name: core
+      labels:
+        app: core
+    spec:
+      containers:
+        - name: core
+          image: huibvstraten/music-release-notifier-core:0.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: POSTGRES_HOST
+              value: "postgres-service"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: core-configmap
+                  key: postgres_db
+            - name: outbox_database
+              valueFrom:
+                configMapKeyRef:
+                  name: core-configmap
+                  key: outbox_database
+            - name: tidal_client_id
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: tidal_client_id
+            - name: tidal_client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: tidal_client_secret
+            - name: spotify_client_id
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: spotify_client_id
+            - name: spotify_client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: core-secret
+                  key: spotify_client_secret
+      restartPolicy: Always
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-service
+spec:
+  selector:
+    app: core
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

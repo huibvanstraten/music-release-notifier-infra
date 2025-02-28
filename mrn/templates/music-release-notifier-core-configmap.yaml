@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-configmap
+data:
+  outbox_database: "postgres"
+  postgres_db: "music-release-notifier"

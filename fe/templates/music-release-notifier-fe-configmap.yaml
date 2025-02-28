@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fe-configmap
+data:
+  core-service-base-url: "bla"
+  keycloak-base-url: "postgres"
+
+  
