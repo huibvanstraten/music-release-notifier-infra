@@ -1,18 +1,17 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: postgres-deployment
-  labels:
-    app: {{ .Values.appName }}
+  name: postgres
 spec:
-  replicas: 1
+  serviceName: postgres
+  replicas: 2
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
+      app: postgres
   template:
     metadata:
       labels:
-        app: {{ .Values.appName }}
+        app: postgres
     spec:
       containers:
         - name: database
@@ -36,6 +35,13 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: password
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdb
+      volumes:
+        - name: postgresdb
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
       restartPolicy: Always
 ---
 
@@ -45,8 +51,9 @@ metadata:
   name: postgres-service
 spec:
   selector:
-    app: {{ .Values.appName }}
+    app: postgres
   ports:
     - protocol: TCP
+      name: http
       port: 5432
       targetPort: 5432
